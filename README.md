@@ -7,9 +7,9 @@ This repo contains efforts to accomplish robotic tasks using RL.
 The world designed for this task is simple: The effector of the
 robotic arm has to reach a target. Inspired from OpenAI Gym, it has only a few methods: 
 
-* env.reset():  to reset the world
-* env.step(action): interaction with world  
-* env.initRender() and env.render():  to visualize the actual setup
+* `env.reset()` :  to reset the world
+* `env.step(action)`: interaction with world  
+* `env.initRender()` and `env.render()`:  visualize the actual setup
 
 ### Actions
 
