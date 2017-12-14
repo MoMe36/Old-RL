@@ -35,7 +35,7 @@ def discountReward(r, gamma = 0.99):
 # ex: for 2 joints: [J0RotateRight, J0RotateLeft, J1RotateRight, J1RotateLeft]
 
 env = World.World(robotJoints = 2, robotJointsLength = 0.35, 
-	randomizeRobot = False, randomizeTarget = False, 
+	randomizeRobot = False, randomizeTarget = True, 
 	groundHeight =0.05, targetLimits = [0.2,0.8,0.1,0.6], maxSteps = 200)
 
 observation_space = 4
@@ -56,7 +56,7 @@ successiveActions = 5 # number of frames before choosing new action given percep
 #						    Learning Loop
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
-epochs = 2000
+epochs = 5000
 updateFreq = 5
 
 
@@ -74,10 +74,11 @@ for epoch in range(epochs):
 	reward = 0
 	while not complete: 
 
-		sTensor = Variable(torch.Tensor(s).type(torch.FloatTensor))
-		distrib = (model(sTensor.unsqueeze(0)).data.numpy()).reshape(-1)
-		choice = np.random.choice(distrib, p = distrib)
-		action = np.argmax(choice == distrib)
+		if steps%successiveActions == 0:
+			sTensor = Variable(torch.Tensor(s).type(torch.FloatTensor))
+			distrib = (model(sTensor.unsqueeze(0)).data.numpy()).reshape(-1)
+			choice = np.random.choice(distrib, p = distrib)
+			action = np.argmax(choice == distrib)
 
 		ns, r, complete, success = env.step(action)
 
