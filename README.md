@@ -17,10 +17,11 @@ You have 2*n actions availables, where n is the number of joints. You can contro
 
 ## RL algorithms 
 
-Currently, the repo only has one method: 
+Currently, the repo only has two methods: 
 * DQN
+* PG
 
-However, soon PG and other algorithms shall be added.
+However, soon Actor-Critic and other algorithms shall be added.
 
 
 ## Dependencies
