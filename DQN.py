@@ -56,10 +56,12 @@ def discountReward(r, gamma = 0.99):
 
 # robotJoints controls the number of joints in the robot 
 # world is designed to be inside a [0->1], [0->1] space. Hence, robotJointsLength*robotJoints should be less than 1
-
+# State is distance between the effector and the ball in the following form -> [dX_Positive, dX_Negative, dY_Pos, dY_Neg]
+# Actions [rotate right, rotate left] for i in range(nbJoints)
+# ex: for 2 joints: [J0RotateRight, J0RotateLeft, J1RotateRight, J1RotateLeft]
 env = World.World(robotJoints = 2, robotJointsLength = 0.35, 
-	randomizeRobot = False, randomizeTarget = False, 
-	groundHeight =0.05, targetLimits = [0.2,0.8,0.1,0.6])
+	randomizeRobot = False, randomizeTarget = True, 
+	groundHeight =0.05, targetLimits = [0.2,0.8,0.1,0.6], maxSteps = 200)
 
 observation_space = 4
 action_space = env.actionSpaceSize()
@@ -71,24 +73,29 @@ action_space = env.actionSpaceSize()
 
 hiddenSize = 100
 model = nn.Sequential(nn.Linear(observation_space, hiddenSize), nn.ReLU(), nn.Linear(hiddenSize, action_space))
+
+successiveActions = 10 # number of frames before choosing new action given perceptions
+
+load = True
+if load: 
+	print('Loading previous model....')
+	model = torch.load('catcherDQN.robot')
+	print('Model loaded !')
+
 adam = optim.Adam(model.parameters(), 1e-3)
-
-successiveActions = 3 # number of frames before choosing new action given perceptions
-
-
 
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 #						    Learning Loop
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
-epochs = 2000
+epochs = 20000
 batch_size = 128
 memory = Memory(2000)
 
 
 epsi_max = 0.9
 epsi_min = 0.1
-epsi_decay = 500
+epsi_decay = 5000
 
 informationFreq = 100
 successes = 0
@@ -190,7 +197,7 @@ for epoch in range(epochs):
 				print(text)
 				success_history.append(successes)
 				successes = 0
-				torch.save(model, 'catcher.robot')
+				torch.save(model, 'catcherDQN.robot')
 
 
 
@@ -198,12 +205,19 @@ for epoch in range(epochs):
 #						   Visualisation
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
-success_history = np.array(success_history)
-plt.plot(range(success_history.shape[0]), success_history)
-plt.title('Successes over slices of {} trials'.format(informationFreq))
-plt.xlabel('Trials')
-plt.ylabel('Successes')
-plt.show()
+
+
+def mplot(success): 
+
+	success = np.array(success)
+	plt.bar(range(success.shape[0]), success)
+	plt.title('Successes over slices of {} trials'.format(informationFreq))
+	plt.xlabel('Trials')
+	plt.ylabel('Successes')
+	plt.ylim(0,101)
+	plt.show()
+
+mplot(success_history)
 
 
 env.initRender()

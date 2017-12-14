@@ -48,15 +48,21 @@ action_space = env.actionSpaceSize()
 
 hiddenSize = 100
 model = nn.Sequential(nn.Linear(observation_space, hiddenSize), nn.ReLU(), nn.Linear(hiddenSize, action_space), nn.Softmax())
+load = False
+
+if load: 
+	model = torch.load('catcherPG.robot')
+
+
 adam = optim.Adam(model.parameters(), 1e-3)
 
-successiveActions = 5 # number of frames before choosing new action given perceptions
+successiveActions = 10 # number of frames before choosing new action given perceptions
 
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 #						    Learning Loop
 # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
-epochs = 5000
+epochs = 10000
 updateFreq = 5
 
 
