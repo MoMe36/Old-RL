@@ -73,7 +73,7 @@ class World():
 		# ------------------------------------------------------------------
 		# ------- Reward -----------
 		# ------------------------------------------------------------------
-		reward = 0
+		reward = -1
 
 
 		# ------------------------------------------------------------------
@@ -86,12 +86,12 @@ class World():
 		for p in self.robot.points:    # checking whether touching the ground
 			if p[1] < self.ground.height: 
 				complete = True
-				reward = -1
+				reward = 0
 
 		if distance < 0.03:  # target reached
 			complete = True
 			success = 1
-			reward = 1
+			reward = 10
 
 		if self.steps > self.maxSteps: 
 			complete = True
