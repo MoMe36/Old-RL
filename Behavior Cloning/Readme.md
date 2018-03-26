@@ -6,4 +6,4 @@ In order to guide the robot, we use Behavior Cloning to guide the action selecti
 ### Jacobian 
 
 Also, in trivial cases, it is easy to compute the jacobian for IK. However, 
-it might very well be a complex function if the robot is more complex. Why not try to learn it ? 
+it might very well be a complex function if the robot is more sophisticated. Why not try to learn it ? 
