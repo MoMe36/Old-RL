@@ -57,6 +57,7 @@ class Robot:
 		config += vec 
 		# print(config)
 		# input()
+		config = config%(np.pi*2)
 		self.config = config.copy()
 
 	@property
@@ -100,6 +101,17 @@ class World(gym.Env):
 		self.render_ready = False 
 		self.render_size = [700, 700]
 
+
+		low = np.zeros(5)
+		high = np.array([np.pi*2 for i in range(3)] + [3.,3.])
+
+		self.action_space  = spaces.Box(np.ones((3))*(-0.5), np.ones((3))*0.5, dtype = np.float)
+		self.observation_space = spaces.Box(low = low, high = high, dtype = np.float)
+
+	def seed(self, seed = None): 
+
+		return
+
 	def step(self, action): 
 
 		self.steps += 1
@@ -110,6 +122,8 @@ class World(gym.Env):
 	def observe(self): 
 
 		angles = self.robot.angles
+		vector = self.vector_target_to_end_effector()
+
 		d = self.compute_distance_end_effector_target()
 		if d <= 0.03: 
 			reward = 1.
@@ -121,12 +135,14 @@ class World(gym.Env):
 		if self.steps > self.max_steps: 
 			over = True
 
-		return list(angles.reshape(-1)), reward, over, None 
+		return list(angles.reshape(-1)) + list(vector.reshape(-1)), reward, over, None 
 
 	def reset(self): 
 
 		self.steps = 0 
 		self.target = Target(self.max_distance)
+
+		return self.observe()[0]
 
 	def init_render(self): 
 
@@ -171,7 +187,15 @@ class World(gym.Env):
 
 	def compute_distance_end_effector_target(self): 
 
-		return distance(compute_effector_position(self.robot.config, self.joints_length), self.target.pos)
+		return distance(self.position_end_effector_target(), self.target.pos)
+
+	def position_end_effector_target(self): 
+
+		return compute_effector_position(self.robot.config, self.joints_length)
+
+	def vector_target_to_end_effector(self): 
+
+		return self.target.pos - self.position_end_effector_target() 
 
 class DebugRender(arcade.Window): 
 
@@ -214,10 +238,11 @@ class DebugRender(arcade.Window):
 		self.world.step(np.random.uniform(-0.1,0.1, (3)))
 
 
-# w = World()
+w = World()
 # render = DebugRender(w)
 # arcade.run()
 # for a in range(1000): 
 
 # 	w.render()
-# 	w.step(np.random.uniform(-0.1,0.1, (3)))
+# 	l  = w.step(np.random.uniform(-0.1,0.1, (3)))
+# 	print(len(l[0]))
