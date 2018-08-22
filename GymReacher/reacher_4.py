@@ -57,7 +57,8 @@ class Robot:
 		config += vec 
 		# print(config)
 		# input()
-		config = config%(np.pi*2)
+		# config = config%(np.pi*2)
+		config = np.clip(config, 0., np.pi*2.)
 		self.config = config.copy()
 
 	@property
@@ -102,10 +103,12 @@ class World(gym.Env):
 		self.render_size = [700, 700]
 
 
+		self.max_torque = 0.1
+
 		low = np.zeros(5)
 		high = np.array([np.pi*2 for i in range(3)] + [3.,3.])
 
-		self.action_space  = spaces.Box(np.ones((3))*(-0.5), np.ones((3))*0.5, dtype = np.float)
+		self.action_space  = spaces.Box(np.ones((3))*(-self.max_torque), np.ones((3))*self.max_torque, dtype = np.float)
 		self.observation_space = spaces.Box(low = low, high = high, dtype = np.float)
 
 	def seed(self, seed = None): 
@@ -113,6 +116,8 @@ class World(gym.Env):
 		return
 
 	def step(self, action): 
+
+		action = np.clip(action, -self.max_torque, self.max_torque)
 
 		self.steps += 1
 		self.robot.rotate(action)
@@ -129,13 +134,13 @@ class World(gym.Env):
 			reward = 1.
 			over = True 
 		else: 
-			reward = -d
+			reward = 0.
 			over = False 
 
 		if self.steps > self.max_steps: 
 			over = True
 
-		return list(angles.reshape(-1)) + list(vector.reshape(-1)), reward, over, None 
+		return list(angles.reshape(-1)) + list(vector.reshape(-1)), reward, over, {} 
 
 	def reset(self): 
 
@@ -150,8 +155,9 @@ class World(gym.Env):
 		self.screen = pg.display.set_mode(self.render_size)
 		self.clock = pg.time.Clock()
 
-	def render(self, time = 30., mode ='human', close = 'false'): 
+	def render(self, mode ='human', close = 'false'): 
 
+		time = 30.
 		if not self.render_ready: 
 			self.init_render()
 			self.render_ready = True
